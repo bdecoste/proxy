@@ -5,6 +5,8 @@ FROM rhel7:latest
 # sudo apt-get update && apt-get whichever
 # sudo /usr/local/bin/proxy-redirection-restore
 
+USER root
+
 RUN yum install -y --disablerepo=\* --enablerepo=rhel-7-server-optional-rpms --enablerepo=rhel-7-server-rpms --enablerepo=rhel-server-rhscl-7-rpms \
       curl \
       iptables \
