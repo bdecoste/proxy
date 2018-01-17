@@ -121,6 +121,11 @@ fi
 # Create a new chain for redirecting inbound traffic to the common Envoy port.
 # In the ISTIO_INBOUND and ISTIO_OUTBOUND chains, '-j RETURN' bypasses Envoy
 # and '-j ISTIO_REDIRECT' redirects to Envoy.
+whoami
+pwd
+
+/usr/sbin/iptables --list
+
 iptables -t nat -N ISTIO_REDIRECT
 iptables -t nat -A ISTIO_REDIRECT -p tcp -j REDIRECT --to-port ${ENVOY_PORT:-15001}
 
