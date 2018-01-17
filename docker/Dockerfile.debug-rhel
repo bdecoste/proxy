@@ -36,7 +36,7 @@ RUN useradd -m --uid 1337 istio-proxy && \
     chown -R istio-proxy /var/lib/istio && \
     chown -R istio-proxy /var/log/istio
 
-#RUN setcap CAP_NET_RAW,CAP_NET_ADMIN,CAP_DAC_OVERRIDE,CAP_NET_BIND_SERVICE+pei /usr/sbin/xtables-multi
-#RUN chmod u+s /usr/sbin/iptables && chmod u+s /usr/sbin/xtables-multi
+RUN setcap CAP_NET_RAW,CAP_NET_ADMIN,CAP_DAC_OVERRIDE,CAP_NET_BIND_SERVICE+pei /usr/sbin/xtables-multi
+RUN chmod u+s /usr/sbin/iptables && chmod u+s /usr/sbin/xtables-multi
 
 ENTRYPOINT /usr/local/bin/istio-start.sh
