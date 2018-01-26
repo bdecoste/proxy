@@ -41,9 +41,9 @@ REPO=${REPO:-gcr.io}
 
 TAG=${TAG:-$DOCKER_TAG}
 
-BAZEL_TARGET_DIR="bazel-bin/src/envoy"
+BUILD_TARGET_DIR="/root/cmake-build-debug"
 
-BAZEL_TARGET="${BAZEL_TARGET_DIR}/envoy"
+BUILD_TARGET="${BUILD_TARGET_DIR}/envoy"
 RELEASE_IMAGE_NAME=${RELEASE_IMAGE_NAME:-${REPO}/${PROJECT}/envoy:${TAG}}
 DEBUG_IMAGE_NAME=${DEBUG_IMAGE_NAME:-${REPO}/${PROJECT}/envoy-debug:${TAG}}
 
@@ -52,14 +52,14 @@ if [[ ${1-} != "debug" ]] ; then
 fi
 
 echo Publishing debug docker image
-rm -f ${BAZEL_TARGET_DIR}/envoy
-bazel build -c dbg //src/envoy
-cp tools/deb/istio-iptables.sh ${BAZEL_TARGET_DIR}
-cp tools/deb/istio-start.sh ${BAZEL_TARGET_DIR}
-cp tools/deb/envoy.json ${BAZEL_TARGET_DIR}
-cp docker/proxy-* ${BAZEL_TARGET_DIR}
-cp docker/Dockerfile.debug-rhel ${BAZEL_TARGET_DIR}
-docker build -f ${BAZEL_TARGET_DIR}/Dockerfile.debug-rhel -t "${DEBUG_IMAGE_NAME}" ${BAZEL_TARGET_DIR}
+cp tools/deb/istio-iptables.sh ${BUILD_TARGET_DIR}
+cp tools/deb/istio-start.sh ${BUILD_TARGET_DIR}
+cp tools/deb/envoy.json ${BUILD_TARGET_DIR}
+cp docker/proxy-* ${BUILD_TARGET_DIR}
+cp docker/Dockerfile.debug-rhel ${BUILD_TARGET_DIR}
+cp /root/proxy/docker/Dockerfile.debug-rhel ${BUILD_TARGET_DIR}
+cd ${BUILD_TARGET_DIR}
+docker build -f Dockerfile.debug-rhel -t "${DEBUG_IMAGE_NAME}" . 
 
 if [[ ${1-} != "debug" ]] ; then
    gcloud docker -- push "${DEBUG_IMAGE_NAME}"

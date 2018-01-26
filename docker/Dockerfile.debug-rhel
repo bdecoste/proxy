@@ -28,15 +28,13 @@ ADD istio-start.sh /usr/local/bin/istio-start.sh
 ADD envoy.json /var/lib/istio/envoy/envoy.json
 ADD envoy /usr/local/bin/envoy
 
-RUN mkdir -p /var/log/istio && touch /var/log/istio/istio.log
-
 # Sudoers used to allow tcpdump and other debug utilities.
 RUN useradd -m --uid 1337 istio-proxy && \
     echo "istio-proxy ALL=NOPASSWD: ALL" >> /etc/sudoers && \
-    chown -R istio-proxy /var/lib/istio && \
-    chown -R istio-proxy /var/log/istio
+    chown -R istio-proxy /var/lib/istio 
 
-RUN setcap CAP_NET_RAW,CAP_NET_ADMIN,CAP_DAC_OVERRIDE,CAP_NET_BIND_SERVICE+pei /usr/sbin/xtables-multi
-RUN chmod u+s /usr/sbin/iptables && chmod u+s /usr/sbin/xtables-multi
+#RUN mkdir -p /var/log/istio && touch /var/log/istio/istio.log && chown -R istio-proxy /var/log/istio
+#RUN setcap ALL,CAP_NET_RAW,CAP_NET_ADMIN,CAP_DAC_OVERRIDE,CAP_NET_BIND_SERVICE+pei /usr/sbin/xtables-multi
+#RUN chmod u+s /usr/sbin/iptables && chmod u+s /usr/sbin/xtables-multi
 
 ENTRYPOINT /usr/local/bin/istio-start.sh
