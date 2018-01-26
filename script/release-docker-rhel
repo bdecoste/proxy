@@ -33,7 +33,7 @@ set -o pipefail
 
 PROJECT=${PROJECT:-istio-testing}
 
-SHA=$(git rev-parse HEAD)
+#SHA=$(git rev-parse HEAD)
 
 DOCKER_TAG="${SHA}"
 
