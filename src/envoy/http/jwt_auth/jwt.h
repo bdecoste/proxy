@@ -18,7 +18,7 @@
 #include "envoy/json/json_object.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
-#include "envoy/http/jwt_auth/bssl_wrapper.h"
+#include "common/ssl/bssl_wrapper.h"
 
 #include <string>
 #include <utility>

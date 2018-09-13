@@ -25,6 +25,4 @@ load(
 envoy_proto_library(
     name = "context_proto",
     srcs = ["context.proto"],
-    external_deps = [],
-    generate_python = [],
 )

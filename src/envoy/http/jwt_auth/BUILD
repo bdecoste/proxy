@@ -24,6 +24,16 @@ load(
     "envoy_cc_test",
 )
 
+#envoy_cc_library(
+#    name = "bssl_wrapper_lib",
+#    srcs = ["bssl_wrapper.cc"],
+#    hdrs = ["bssl_wrapper.h"],
+#    repository = "@envoy",
+#    deps = [
+#         "@openssl_crypto//:openssl-lib",
+#    ],
+#)
+
 envoy_cc_library(
     name = "jwt_lib",
     srcs = ["jwt.cc"],
@@ -35,6 +45,8 @@ envoy_cc_library(
     deps = [
         "@envoy//source/exe:envoy_common_lib",
         "@openssl_crypto//:openssl-lib",
+        "@envoy//source/common/ssl:bssl_wrapper_lib",
+#        ":bssl_wrapper_lib",
     ],
 )
 
@@ -141,3 +153,4 @@ envoy_cc_test(
         "@envoy//test/test_common:utility_lib",
     ],
 )
+

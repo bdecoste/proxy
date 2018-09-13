@@ -125,7 +125,7 @@ bool IsMutualTLS(const Network::Connection* connection) {
 
 bool GetRequestedServerName(const Network::Connection* connection,
                             std::string* name) {
-  if (connection && !connection->requestedServerName().empty()) {
+  if (connection) {
     *name = std::string(connection->requestedServerName());
     return true;
   }
