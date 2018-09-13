@@ -16,24 +16,6 @@
 #
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-def boringssl_repositories(bind=True):
-    git_repository(
-        name = "boringssl",
-        commit = "12c35d69008ae6b8486e435447445240509f7662",  # 2016-10-24
-        remote = "https://boringssl.googlesource.com/boringssl",
-    )
-
-    if bind:
-        native.bind(
-            name = "boringssl_crypto",
-            actual = "@boringssl//:crypto",
-        )
-
-        native.bind(
-            name = "libssl",
-            actual = "@boringssl//:ssl",
-        )
-
 def googletest_repositories(bind=True):
     BUILD = """
 # Copyright 2017 Istio Authors. All Rights Reserved.

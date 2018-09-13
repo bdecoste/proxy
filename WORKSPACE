@@ -24,18 +24,19 @@ load(
 googletest_repositories()
 mixerapi_dependencies()
 
-bind(
-    name = "boringssl_crypto",
-    actual = "//external:ssl",
+new_local_repository(
+    name = "openssl_crypto",
+    path = "/usr/local/lib64",
+    build_file = "openssl.BUILD"
 )
 
 # When updating envoy sha manually please update the sha in istio.deps file also
-ENVOY_SHA = "2d8386532f68899ca1fe6476dc458b0df1260b29"
+ENVOY_SHA = "b016da1b34f9c40192038fedafe3509f230b4dbc"
 
-http_archive(
+git_repository(
     name = "envoy",
-    strip_prefix = "envoy-" + ENVOY_SHA,
-    url = "https://github.com/istio/envoy/archive/" + ENVOY_SHA + ".zip",
+    commit = "b016da1b34f9c40192038fedafe3509f230b4dbc",
+    remote = "https://github.com/bdecoste/envoy",
 )
 
 load("@envoy//bazel:repositories.bzl", "envoy_dependencies")

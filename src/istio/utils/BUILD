@@ -32,7 +32,7 @@ cc_library(
     srcs = ["md5.cc"],
     visibility = ["//visibility:public"],
     deps = [
-        "//external:boringssl_crypto",
+        "@openssl_crypto//:openssl-lib",
         "//include/istio/utils:headers_lib",
     ],
 )

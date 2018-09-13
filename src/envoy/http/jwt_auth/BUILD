@@ -30,11 +30,11 @@ envoy_cc_library(
     hdrs = ["jwt.h"],
     external_deps = [
         "rapidjson",
-        "ssl",
     ],
     repository = "@envoy",
     deps = [
         "@envoy//source/exe:envoy_common_lib",
+        "@openssl_crypto//:openssl-lib",
     ],
 )
 
