@@ -163,6 +163,9 @@ class EvpPkeyGetter : public WithStatus {
       UpdateStatus(Status::PEM_PUBKEY_BAD_BASE64);
       return nullptr;
     }
+
+    //auto rsa = bssl::UniquePtr<RSA>(
+    //RSA_public_key_from_bytes(CastToUChar(pkey_der), pkey_der.length()));
     
     RSA* rsa(RSA_new());
     const unsigned char *pp = (const unsigned char *)pkey_der.c_str();
@@ -171,7 +174,11 @@ class EvpPkeyGetter : public WithStatus {
     if (!rsa) {
       UpdateStatus(Status::PEM_PUBKEY_PARSE_ERROR);
     }
-    return EvpPkeyFromRsa(rsa);
+    bssl::UniquePtr<EVP_PKEY> result = EvpPkeyFromRsa(rsa);
+
+    RSA_free(rsa);
+
+    return result;
   }
 
   bssl::UniquePtr<EVP_PKEY> EvpPkeyFromJwkRSA(const std::string &n,
@@ -187,19 +194,30 @@ class EvpPkeyGetter : public WithStatus {
       UpdateStatus(Status::FAILED_CREATE_EC_KEY);
       return nullptr;
     }
-    bssl::UniquePtr<BIGNUM> bn_x = BigNumFromBase64UrlString(x);
-    bssl::UniquePtr<BIGNUM> bn_y = BigNumFromBase64UrlString(y);
+    //bssl::UniquePtr<BIGNUM> bn_x = BigNumFromBase64UrlString(x);
+    //bssl::UniquePtr<BIGNUM> bn_y = BigNumFromBase64UrlString(y);
+
+    BIGNUM* bn_x = BigNumFromBase64UrlString(x);
+    BIGNUM* bn_y = BigNumFromBase64UrlString(y);
+
     if (!bn_x || !bn_y) {
       // EC public key field is missing or has parse error.
       UpdateStatus(Status::JWK_EC_PUBKEY_PARSE_ERROR);
       return nullptr;
     }
 
-    if (EC_KEY_set_public_key_affine_coordinates(ec_key.get(), bn_x.get(),
-                                                 bn_y.get()) == 0) {
+    if (EC_KEY_set_public_key_affine_coordinates(ec_key.get(), bn_x,
+                                                 bn_y) == 0) {
+      BN_free(bn_x);
+      BN_free(bn_y);
+
       UpdateStatus(Status::JWK_EC_PUBKEY_PARSE_ERROR);
       return nullptr;
     }
+
+    BN_free(bn_x);
+    BN_free(bn_y);
+
     return ec_key;
   }
 
@@ -215,13 +233,15 @@ class EvpPkeyGetter : public WithStatus {
     return key;
   }
 
-  bssl::UniquePtr<BIGNUM> BigNumFromBase64UrlString(const std::string &s) {
+//  bssl::UniquePtr<BIGNUM> BigNumFromBase64UrlString(const std::string &s) {
+BIGNUM* BigNumFromBase64UrlString(const std::string &s) {
     std::string s_decoded = Base64UrlDecode(s);
     if (s_decoded == "") {
       return nullptr;
     }
-    return bssl::UniquePtr<BIGNUM>(
-        BN_bin2bn(CastToUChar(s_decoded), s_decoded.length(), NULL));
+//    return bssl::UniquePtr<BIGNUM>(
+//        BN_bin2bn(CastToUChar(s_decoded), s_decoded.length(), NULL));
+    return BN_bin2bn(CastToUChar(s_decoded), s_decoded.length(), NULL);
   };
 
   bssl::UniquePtr<RSA> RsaFromJwk(const std::string &n, const std::string &e) {
@@ -230,15 +250,24 @@ class EvpPkeyGetter : public WithStatus {
     assert(rsa);
 
     int result;
-    bssl::UniquePtr<BIGNUM> rsa_n = BigNumFromBase64UrlString(n);
-    bssl::UniquePtr<BIGNUM> rsa_e = BigNumFromBase64UrlString(e);
+    //bssl::UniquePtr<BIGNUM> rsa_n = BigNumFromBase64UrlString(n);
+    //bssl::UniquePtr<BIGNUM> rsa_e = BigNumFromBase64UrlString(e);
+    BIGNUM* rsa_n = BigNumFromBase64UrlString(n);
+    BIGNUM* rsa_e = BigNumFromBase64UrlString(e);
 
     if (!rsa_n || !rsa_e) {
+
+      //BN_free(rsa_n);
+      //BN_free(rsa_e);
+
       // RSA public key field is missing or has parse error.
       UpdateStatus(Status::JWK_RSA_PUBKEY_PARSE_ERROR);
       return nullptr;
     }
-    result = RSA_set0_key(rsa.get(), rsa_n.get(), rsa_e.get(), nullptr);
+    result = RSA_set0_key(rsa.get(), rsa_n, rsa_e, nullptr);
+
+    //BN_free(rsa_n);
+    //BN_free(rsa_e);
 
     return rsa;
   }
@@ -344,16 +373,23 @@ bool Verifier::VerifySignatureRSA(EVP_PKEY *key, const EVP_MD *md,
                                   size_t signature_len,
                                   const uint8_t *signed_data,
                                   size_t signed_data_len) {
+std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureRSA 1 \n";
   bssl::UniquePtr<EVP_MD_CTX> md_ctx(EVP_MD_CTX_create());
 
   EVP_DigestVerifyInit(md_ctx.get(), nullptr, md, nullptr, key);
   EVP_DigestVerifyUpdate(md_ctx.get(), signed_data, signed_data_len);
+
+std::cerr << "!!!!!!!!!!!!!!!!!!!! md_ctx.get() " << md_ctx.get() << " \n";
+std::cerr << "!!!!!!!!!!!!!!!!!!!! md " << md << " \n";
+std::cerr << "!!!!!!!!!!!!!!!!!!!! key " << key << " \n";
+
   return (EVP_DigestVerifyFinal(md_ctx.get(), signature, signature_len) == 1);
 }
 
 bool Verifier::VerifySignatureRSA(EVP_PKEY *key, const EVP_MD *md,
                                   const std::string &signature,
                                   const std::string &signed_data) {
+std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureRSA 2 \n";
   return VerifySignatureRSA(key, md, CastToUChar(signature), signature.length(),
                             CastToUChar(signed_data), signed_data.length());
 }
@@ -362,6 +398,7 @@ bool Verifier::VerifySignatureEC(EC_KEY *key, const uint8_t *signature,
                                  size_t signature_len,
                                  const uint8_t *signed_data,
                                  size_t signed_data_len) {
+std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureEC 1 \n";
   // ES256 signature should be 64 bytes.
   if (signature_len != 2 * 32) {
     return false;
@@ -388,10 +425,12 @@ bool Verifier::VerifySignatureEC(EC_KEY *key, const uint8_t *signature,
           1);
 
   return verified;
+
 }
 
 bool Verifier::VerifySignatureEC(EC_KEY *key, const std::string &signature,
                                  const std::string &signed_data) {
+std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureEC 2 \n";
   return VerifySignatureEC(key, CastToUChar(signature), signature.length(),
                            CastToUChar(signed_data), signed_data.length());
 }
@@ -408,7 +447,7 @@ bool Verifier::Verify(const Jwt &jwt, const Pubkeys &pubkeys) {
     UpdateStatus(pubkeys.GetStatus());
     return false;
   }
-
+std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! Verify \n";
   std::string signed_data =
       jwt.header_str_base64url_ + '.' + jwt.payload_str_base64url_;
   bool kid_alg_matched = false;
@@ -425,6 +464,8 @@ bool Verifier::Verify(const Jwt &jwt, const Pubkeys &pubkeys) {
       continue;
     }
     kid_alg_matched = true;
+
+std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! Verify pubkey " << pubkey->evp_pkey_.get() << " \n";
 
     if (pubkey->kty_ == "EC" &&
         VerifySignatureEC(pubkey->ec_key_.get(), jwt.signature_, signed_data)) {
