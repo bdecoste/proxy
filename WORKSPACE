@@ -26,16 +26,16 @@ mixerapi_dependencies()
 
 new_local_repository(
     name = "openssl_crypto",
-    path = "/usr/local/lib64",
+    path = "/usr/lib64",
     build_file = "openssl.BUILD"
 )
 
 # When updating envoy sha manually please update the sha in istio.deps file also
-ENVOY_SHA = "9c23083910a000af307ce1ad6b1d7411ec059885"
+ENVOY_SHA = "ddd88f4f794ab9268084240d58bfcf5bd1a28960"
 
 git_repository(
     name = "envoy",
-    commit = "9c23083910a000af307ce1ad6b1d7411ec059885",
+    commit = "ddd88f4f794ab9268084240d58bfcf5bd1a28960",
     remote = "https://github.com/bdecoste/envoy",
 )
 
