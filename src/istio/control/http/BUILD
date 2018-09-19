@@ -69,6 +69,12 @@ cc_test(
     srcs = [
         "request_handler_impl_test.cc",
     ],
+    linkopts = [
+        "-lm",
+        "-lpthread",
+        "-ldl",
+        "-lz",
+    ],
     linkstatic = 1,
     deps = [
         ":control_lib",

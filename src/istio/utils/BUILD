@@ -59,6 +59,8 @@ cc_test(
     linkopts = [
         "-lm",
         "-lpthread",
+        "-ldl",
+        "-lz",
     ],
     linkstatic = 1,
     deps = [

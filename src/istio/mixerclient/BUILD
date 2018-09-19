@@ -88,6 +88,12 @@ cc_test(
     name = "check_cache_test",
     size = "small",
     srcs = ["check_cache_test.cc"],
+    linkopts = [
+        "-lm",
+        "-lpthread",
+        "-ldl",
+        "-lz",
+    ],
     linkstatic = 1,
     deps = [
         ":mixerclient_lib",
@@ -122,6 +128,12 @@ cc_test(
     name = "quota_cache_test",
     size = "small",
     srcs = ["quota_cache_test.cc"],
+    linkopts = [
+        "-lm",
+        "-lpthread",
+        "-ldl",
+        "-lz",
+    ],
     linkstatic = 1,
     deps = [
         ":mixerclient_lib",
@@ -134,6 +146,12 @@ cc_test(
     name = "referenced_test",
     size = "small",
     srcs = ["referenced_test.cc"],
+    linkopts = [
+        "-lm",
+        "-lpthread",
+        "-ldl",
+        "-lz",
+    ],
     linkstatic = 1,
     deps = [
         ":mixerclient_lib",
@@ -151,6 +169,8 @@ cc_test(
             "-lm",
             "-lpthread",
             "-lrt",
+            "-ldl",
+            "-lz",
         ],
     }),
     linkstatic = 1,

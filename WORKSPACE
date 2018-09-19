@@ -31,11 +31,11 @@ new_local_repository(
 )
 
 # When updating envoy sha manually please update the sha in istio.deps file also
-ENVOY_SHA = "ddd88f4f794ab9268084240d58bfcf5bd1a28960"
+ENVOY_SHA = "8bd9ae6876a3e61e434c16bd4ddb12fae12b50cc"
 
 git_repository(
     name = "envoy",
-    commit = "ddd88f4f794ab9268084240d58bfcf5bd1a28960",
+    commit = "8bd9ae6876a3e61e434c16bd4ddb12fae12b50cc",
     remote = "https://github.com/bdecoste/envoy",
 )
 
