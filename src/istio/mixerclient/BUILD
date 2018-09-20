@@ -92,7 +92,6 @@ cc_test(
         "-lm",
         "-lpthread",
         "-ldl",
-        "-lz",
     ],
     linkstatic = 1,
     deps = [
@@ -132,7 +131,6 @@ cc_test(
         "-lm",
         "-lpthread",
         "-ldl",
-        "-lz",
     ],
     linkstatic = 1,
     deps = [
@@ -150,7 +148,6 @@ cc_test(
         "-lm",
         "-lpthread",
         "-ldl",
-        "-lz",
     ],
     linkstatic = 1,
     deps = [
@@ -170,7 +167,6 @@ cc_test(
             "-lpthread",
             "-lrt",
             "-ldl",
-            "-lz",
         ],
     }),
     linkstatic = 1,

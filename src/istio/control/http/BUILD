@@ -73,7 +73,6 @@ cc_test(
         "-lm",
         "-lpthread",
         "-ldl",
-        "-lz",
     ],
     linkstatic = 1,
     deps = [
