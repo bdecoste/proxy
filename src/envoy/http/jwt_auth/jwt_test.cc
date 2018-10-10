@@ -443,7 +443,6 @@ class JwtTest : public testing::Test {
     } else {
       ASSERT_TRUE(0);
     }
-std::cerr << "************************ verify key \n";
     EXPECT_EQ(verified, v.Verify(jwt, *key));
     EXPECT_EQ(status, v.GetStatus());
     if (verified) {

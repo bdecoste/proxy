@@ -373,15 +373,10 @@ bool Verifier::VerifySignatureRSA(EVP_PKEY *key, const EVP_MD *md,
                                   size_t signature_len,
                                   const uint8_t *signed_data,
                                   size_t signed_data_len) {
-std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureRSA 1 \n";
   bssl::UniquePtr<EVP_MD_CTX> md_ctx(EVP_MD_CTX_create());
 
   EVP_DigestVerifyInit(md_ctx.get(), nullptr, md, nullptr, key);
   EVP_DigestVerifyUpdate(md_ctx.get(), signed_data, signed_data_len);
-
-std::cerr << "!!!!!!!!!!!!!!!!!!!! md_ctx.get() " << md_ctx.get() << " \n";
-std::cerr << "!!!!!!!!!!!!!!!!!!!! md " << md << " \n";
-std::cerr << "!!!!!!!!!!!!!!!!!!!! key " << key << " \n";
 
   return (EVP_DigestVerifyFinal(md_ctx.get(), signature, signature_len) == 1);
 }
@@ -389,7 +384,6 @@ std::cerr << "!!!!!!!!!!!!!!!!!!!! key " << key << " \n";
 bool Verifier::VerifySignatureRSA(EVP_PKEY *key, const EVP_MD *md,
                                   const std::string &signature,
                                   const std::string &signed_data) {
-std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureRSA 2 \n";
   return VerifySignatureRSA(key, md, CastToUChar(signature), signature.length(),
                             CastToUChar(signed_data), signed_data.length());
 }
@@ -398,7 +392,6 @@ bool Verifier::VerifySignatureEC(EC_KEY *key, const uint8_t *signature,
                                  size_t signature_len,
                                  const uint8_t *signed_data,
                                  size_t signed_data_len) {
-std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureEC 1 \n";
   // ES256 signature should be 64 bytes.
   if (signature_len != 2 * 32) {
     return false;
@@ -430,7 +423,6 @@ std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureEC 1 \n";
 
 bool Verifier::VerifySignatureEC(EC_KEY *key, const std::string &signature,
                                  const std::string &signed_data) {
-std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! VerifySignatureEC 2 \n";
   return VerifySignatureEC(key, CastToUChar(signature), signature.length(),
                            CastToUChar(signed_data), signed_data.length());
 }
@@ -447,7 +439,6 @@ bool Verifier::Verify(const Jwt &jwt, const Pubkeys &pubkeys) {
     UpdateStatus(pubkeys.GetStatus());
     return false;
   }
-std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! Verify \n";
   std::string signed_data =
       jwt.header_str_base64url_ + '.' + jwt.payload_str_base64url_;
   bool kid_alg_matched = false;
@@ -464,8 +455,6 @@ std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! Verify \n";
       continue;
     }
     kid_alg_matched = true;
-
-std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!! Verify pubkey " << pubkey->evp_pkey_.get() << " \n";
 
     if (pubkey->kty_ == "EC" &&
         VerifySignatureEC(pubkey->ec_key_.get(), jwt.signature_, signed_data)) {
