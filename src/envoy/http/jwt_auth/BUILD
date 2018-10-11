@@ -33,8 +33,8 @@ envoy_cc_library(
     ],
     repository = "@envoy",
     deps = [
+        "@openssl//:openssl-lib",
         "@envoy//source/exe:envoy_common_lib",
-        "@openssl_crypto//:openssl-lib",
         "@envoy//source/common/ssl:bssl_wrapper_lib",
     ],
 )
