@@ -9,8 +9,8 @@
 	{
 		"_comment": "",
 		"name": "ENVOY_SHA",
-		"repoName": "envoyproxy/envoy",
+		"repoName": "bdecoste/envoy",
 		"file": "WORKSPACE",
-		"lastStableSHA": "de039269f54aa21aa0da21da89a5075aa3db3bb9"
+		"lastStableSHA": "d61de1ec7f9cd6b6e9c533b354f72ac3b28d7dd1"
 	}
 ]

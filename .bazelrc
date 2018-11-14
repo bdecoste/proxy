@@ -1,6 +1,9 @@
 # Copied from https://github.com/envoyproxy/envoy/blob/master/tools/bazel.rc
 # Envoy specific Bazel build/test options.
 
+build --cxxopt -D_GLIBCXX_USE_CXX11_ABI=1
+build --cxxopt -DENVOY_IGNORE_GLIBCXX_USE_CXX11_ABI_ERROR=1
+
 build --workspace_status_command=tools/bazel_get_workspace_status
 
 # Basic ASAN/UBSAN that works for gcc
