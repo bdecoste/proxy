@@ -11,6 +11,6 @@
 		"name": "ENVOY_SHA",
 		"repoName": "bdecoste/envoy",
 		"file": "WORKSPACE",
-		"lastStableSHA": "1a6f8c830e7889360afd167b51f63bff4f5a9b25"
+		"lastStableSHA": "bb381150768dd2fd8b14863cc31d7c9aeecd989c"
 	}
 ]
