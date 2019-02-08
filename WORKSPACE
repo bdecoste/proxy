@@ -27,23 +27,27 @@ googletest_repositories()
 
 mixerapi_dependencies()
 
-bind(
-    name = "boringssl_crypto",
-    actual = "//external:ssl",
+new_local_repository(
+    name = "openssl",
+    path = "/usr/local/lib64/openssl",
+    build_file = "openssl.BUILD"
 )
 
 # When updating envoy sha manually please update the sha in istio.deps file also
 #
 # Determine SHA256 `wget https://github.com/envoyproxy/envoy/archive/COMMIT.tar.gz && sha256sum COMMIT.tar.gz`
-ENVOY_SHA = "b3be5713f2100ab5c40316e73ce34581245bd26a"
+#ENVOY_SHA = "b3be5713f2100ab5c40316e73ce34581245bd26a"
+#ENVOY_SHA256 = "79629284ae143d66b873c08883dc6382fac2e8ed45f6f3521f7e7282b6650216"
 
-ENVOY_SHA256 = "79629284ae143d66b873c08883dc6382fac2e8ed45f6f3521f7e7282b6650216"
+ENVOY_SHA = "5bae7930aa2afc26d82fb17cffa84009529131b4"
+ENVOY_SHA256 = "5a573e00ddffee2631bbe3db555a2fa14c137e2558d44359f8d376b858154181"
 
 http_archive(
     name = "envoy",
     sha256 = ENVOY_SHA256,
     strip_prefix = "envoy-" + ENVOY_SHA,
-    url = "https://github.com/envoyproxy/envoy/archive/" + ENVOY_SHA + ".tar.gz",
+ #   url = "https://github.com/envoyproxy/envoy/archive/" + ENVOY_SHA + ".tar.gz",
+    url = "https://github.com/bdecoste/envoy/archive/" + ENVOY_SHA + ".tar.gz",
 )
 
 load("@envoy//bazel:repositories.bzl", "envoy_dependencies")

@@ -23,6 +23,8 @@
 #include <utility>
 #include <vector>
 
+#include "bssl_wrapper/bssl_wrapper.h"
+
 namespace Envoy {
 namespace Http {
 namespace JwtAuth {

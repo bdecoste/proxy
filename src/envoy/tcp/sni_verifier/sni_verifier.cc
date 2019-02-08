@@ -16,6 +16,7 @@
 // the implementation (extracting the SNI) is based on the TLS inspector
 // listener filter of Envoy
 
+#include "src/envoy/tcp/sni_verifier/openssl_impl.h"
 #include "src/envoy/tcp/sni_verifier/sni_verifier.h"
 
 #include "envoy/buffer/buffer.h"
@@ -25,7 +26,6 @@
 
 #include "common/common/assert.h"
 
-#include "openssl/bytestring.h"
 #include "openssl/err.h"
 #include "openssl/ssl.h"
 
@@ -35,7 +35,8 @@ namespace SniVerifier {
 
 Config::Config(Stats::Scope& scope, size_t max_client_hello_size)
     : stats_{SNI_VERIFIER_STATS(POOL_COUNTER_PREFIX(scope, "sni_verifier."))},
-      ssl_ctx_(SSL_CTX_new(TLS_with_buffers_method())),
+//      ssl_ctx_(SSL_CTX_new(TLS_with_buffers_method())),
+      ssl_ctx_(SSL_CTX_new(TLS_method())),
       max_client_hello_size_(max_client_hello_size) {
   if (max_client_hello_size_ > TLS_MAX_CLIENT_HELLO) {
     throw EnvoyException(fmt::format(
@@ -45,7 +46,8 @@ Config::Config(Stats::Scope& scope, size_t max_client_hello_size)
 
   SSL_CTX_set_options(ssl_ctx_.get(), SSL_OP_NO_TICKET);
   SSL_CTX_set_session_cache_mode(ssl_ctx_.get(), SSL_SESS_CACHE_OFF);
-  SSL_CTX_set_tlsext_servername_callback(
+
+  /*SSL_CTX_set_tlsext_servername_callback(
       ssl_ctx_.get(), [](SSL* ssl, int* out_alert, void*) -> int {
         Filter* filter = static_cast<Filter*>(SSL_get_app_data(ssl));
 
@@ -58,7 +60,16 @@ Config::Config(Stats::Scope& scope, size_t max_client_hello_size)
         // already.
         *out_alert = SSL_AD_USER_CANCELLED;
         return SSL_TLSEXT_ERR_ALERT_FATAL;
-      });
+      });*/
+  auto tlsext_servername_cb = +[](SSL* ssl, int* out_alert, void* arg) -> int {
+    Filter* filter = static_cast<Filter*>(SSL_get_app_data(ssl));
+    absl::string_view servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
+    filter->onServername(servername);
+
+    return Envoy::Tcp::SniVerifier::getServernameCallbackReturn(out_alert);
+  };
+  SSL_CTX_set_tlsext_servername_callback(ssl_ctx_.get(), tlsext_servername_cb);
+
 }
 
 bssl::UniquePtr<SSL> Config::newSsl() {

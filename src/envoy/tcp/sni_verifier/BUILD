@@ -34,12 +34,28 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
+    name = "openssl_impl_lib",
+    srcs = [
+        "openssl_impl.cc",
+    ],
+    hdrs = [
+        "openssl_impl.h",
+    ],
+    external_deps = [
+        "ssl",
+        "bssl_wrapper_lib",
+    ],
+    repository = "@envoy",
+)
+
+envoy_cc_library(
     name = "sni_verifier_lib",
     srcs = ["sni_verifier.cc"],
     hdrs = ["sni_verifier.h"],
     external_deps = ["ssl"],
     repository = "@envoy",
     deps = [
+        ":openssl_impl_lib",
         "@envoy//source/exe:envoy_common_lib",
     ],
 )
