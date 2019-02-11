@@ -35,9 +35,9 @@ namespace SniVerifier {
 
 Config::Config(Stats::Scope& scope, size_t max_client_hello_size)
     : stats_{SNI_VERIFIER_STATS(POOL_COUNTER_PREFIX(scope, "sni_verifier."))},
-//      ssl_ctx_(SSL_CTX_new(TLS_with_buffers_method())),
       ssl_ctx_(SSL_CTX_new(TLS_method())),
       max_client_hello_size_(max_client_hello_size) {
+
   if (max_client_hello_size_ > TLS_MAX_CLIENT_HELLO) {
     throw EnvoyException(fmt::format(
         "max_client_hello_size of {} is greater than maximum of {}.",
@@ -47,26 +47,18 @@ Config::Config(Stats::Scope& scope, size_t max_client_hello_size)
   SSL_CTX_set_options(ssl_ctx_.get(), SSL_OP_NO_TICKET);
   SSL_CTX_set_session_cache_mode(ssl_ctx_.get(), SSL_SESS_CACHE_OFF);
 
-  /*SSL_CTX_set_tlsext_servername_callback(
-      ssl_ctx_.get(), [](SSL* ssl, int* out_alert, void*) -> int {
-        Filter* filter = static_cast<Filter*>(SSL_get_app_data(ssl));
-
-        if (filter != nullptr) {
-          filter->onServername(
-              SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name));
-        }
-
-        // Return an error to stop the handshake; we have what we wanted
-        // already.
-        *out_alert = SSL_AD_USER_CANCELLED;
-        return SSL_TLSEXT_ERR_ALERT_FATAL;
-      });*/
   auto tlsext_servername_cb = +[](SSL* ssl, int* out_alert, void* arg) -> int {
     Filter* filter = static_cast<Filter*>(SSL_get_app_data(ssl));
-    absl::string_view servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
-    filter->onServername(servername);
+    if (filter != nullptr) {
+      int type = SSL_get_servername_type(ssl);
+      absl::string_view servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
 
-    return Envoy::Tcp::SniVerifier::getServernameCallbackReturn(out_alert);
+      filter->onServername(servername);
+    }
+
+    int result = Envoy::Tcp::SniVerifier::getServernameCallbackReturn(out_alert);
+
+    return result;
   };
   SSL_CTX_set_tlsext_servername_callback(ssl_ctx_.get(), tlsext_servername_cb);
 
@@ -94,14 +86,17 @@ Network::FilterStatus Filter::onData(Buffer::Instance& data, bool) {
   size_t left_space_in_buf = config_->maxClientHelloSize() - read_;
   size_t data_to_read =
       (data.length() < left_space_in_buf) ? data.length() : left_space_in_buf;
+
   data.copyOut(0, data_to_read, buf_.get() + read_);
 
   auto start_handshake_data =
       restart_handshake_ ? buf_.get() : buf_.get() + read_;
+
   auto handshake_size =
       restart_handshake_ ? read_ + data_to_read : data_to_read;
 
   read_ += data_to_read;
+
   parseClientHello(start_handshake_data, handshake_size);
 
   return is_match_ ? Network::FilterStatus::Continue

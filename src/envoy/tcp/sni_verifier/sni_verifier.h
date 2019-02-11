@@ -56,7 +56,7 @@ class Config {
 
   const SniVerifierStats& stats() const { return stats_; }
   bssl::UniquePtr<SSL> newSsl();
-  size_t maxClientHelloSize() const { return max_client_hello_size_; }
+  size_t maxClientHelloSize() const {return max_client_hello_size_;}
 
   static constexpr size_t TLS_MAX_CLIENT_HELLO = 64 * 1024;
 

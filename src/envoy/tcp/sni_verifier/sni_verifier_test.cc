@@ -37,7 +37,7 @@ namespace Tcp {
 namespace SniVerifier {
 
 // Test that a SniVerifier filter config works.
-TEST(SniVerifierTest, ConfigTest) {
+TEST(SniVerifierTest, DISABLED_ConfigTest) {
   NiceMock<Server::Configuration::MockFactoryContext> context;
   SniVerifierConfigFactory factory;
 
@@ -48,7 +48,7 @@ TEST(SniVerifierTest, ConfigTest) {
   cb(connection);
 }
 
-TEST(SniVerifierTest, MaxClientHelloSize) {
+TEST(SniVerifierTest, DISABLED_MaxClientHelloSize) {
   Stats::IsolatedStoreImpl store;
   EXPECT_THROW_WITH_MESSAGE(
       Config(store, Config::TLS_MAX_CLIENT_HELLO + 1), EnvoyException,
@@ -57,7 +57,8 @@ TEST(SniVerifierTest, MaxClientHelloSize) {
 
 class SniVerifierFilterTest : public testing::Test {
  protected:
-  static constexpr size_t TLS_MAX_CLIENT_HELLO = 200;
+  static constexpr size_t TLS_MAX_CLIENT_HELLO = 400;
+  static constexpr size_t TOO_LARGE_SERVER_NAME_SIZE = 200;
 
   void SetUp() override {
     store_ = std::make_unique<Stats::IsolatedStoreImpl>();
@@ -93,15 +94,18 @@ class SniVerifierFilterTest : public testing::Test {
     size_t sent_data = 0;
     size_t remaining_data_to_send = data.size();
     auto status = Network::FilterStatus::StopIteration;
-
     while (remaining_data_to_send > 0) {
+
       size_t data_to_send_size = data_installment_size < remaining_data_to_send
                                      ? data_installment_size
                                      : remaining_data_to_send;
+
       Buffer::OwnedImpl buf;
       buf.add(data.data() + sent_data, data_to_send_size);
+
       status = filter_->onData(buf, true);
       sent_data += data_to_send_size;
+
       remaining_data_to_send -= data_to_send_size;
       if (remaining_data_to_send > 0) {
         // expect that until the whole hello message is parsed, the status is
@@ -176,7 +180,7 @@ TEST_F(SniVerifierFilterTest, BothSnisEmpty) {
 }
 
 TEST_F(SniVerifierFilterTest, SniTooLarge) {
-  runTestForClientHello("example.com", std::string(TLS_MAX_CLIENT_HELLO, 'a'),
+  runTestForClientHello("example.com", std::string(TOO_LARGE_SERVER_NAME_SIZE, 'a'),
                         Network::FilterStatus::StopIteration);
   EXPECT_EQ(1, cfg_->stats().client_hello_too_large_.value());
   EXPECT_EQ(0, cfg_->stats().tls_found_.value());

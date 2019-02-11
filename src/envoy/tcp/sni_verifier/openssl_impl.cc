@@ -16,7 +16,7 @@ namespace Envoy {
 namespace Tcp {
 namespace SniVerifier {
 
-int getServernameCallbackReturn(int* out_alert) { return SSL_TLSEXT_ERR_OK; }
+int getServernameCallbackReturn(int* out_alert) { return 1; }; //SSL_TLSEXT_ERR_OK; }
 
 }  // namespace SniVerifier
 }  // namespace Tcp

@@ -257,6 +257,9 @@ class EvpPkeyGetter : public WithStatus {
       UpdateStatus(Status::JWK_RSA_PUBKEY_PARSE_ERROR);
       return nullptr;
     }
+
+    int result = RSA_set0_key(rsa.get(), rsa_n, rsa_e, nullptr);
+
     return rsa;
   }
 };
@@ -365,6 +368,7 @@ bool Verifier::VerifySignatureRSA(EVP_PKEY *key, const EVP_MD *md,
 
   EVP_DigestVerifyInit(md_ctx.get(), nullptr, md, nullptr, key);
   EVP_DigestVerifyUpdate(md_ctx.get(), signed_data, signed_data_len);
+
   return (EVP_DigestVerifyFinal(md_ctx.get(), signature, signature_len) == 1);
 }
 
